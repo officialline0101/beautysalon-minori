@@ -755,6 +755,14 @@
                 /* テキストの高さ調整 */
             }
         }
+
+.triangle {
+  color: rgb(0, 0, 0);
+  background-color: #cecece; /* オレンジ系など区別しやすい色 */
+  font-weight: bold;
+  cursor: not-allowed; /* カーソルを禁止マークに */
+  pointer-events: none; /* クリック無効化 */
+}
     </style>
 </head>
 
@@ -976,8 +984,13 @@
             </div>
         </div>
 
-        <div class="label">希望日時<span class="required">必須</span></div>
-        <div class="calendar-container">
+<div class="label">希望日時<span class="required">必須</span></div>
+<div class="info-text">
+  ※△の箇所は以下のボタンをタップして<br>
+  お電話でお問い合わせください。
+  <a href="tel:0822878070" style="color:inherit; text-decoration:underline;"><br>お問い合わせはこちら</a>
+</div>
+<div class="calendar-container">
             <!-- 月を独立して配置 -->
             <div class="current-month-container">
                 <span class="current-month" id="currentMonth">月</span>
@@ -1675,58 +1688,70 @@
                         return slot.title !== "営業日" && eventStart < slotEnd && eventEnd > slotStart;
                     });
 
-                    for (let checkTime = new Date(slotStart.getTime()); checkTime < slotEnd; checkTime.setMinutes(checkTime.getMinutes() + 1)) {
-                        let overlapping = 1; // 仮予約1件分を初めからカウント
+let maxOverlap = 0;
 
-                        relevantEvents.forEach(slot => {
-                            const eventStart = new Date(slot.startTime);
-                            const eventEnd = new Date(slot.endTime);
-                            if (eventStart <= checkTime && eventEnd > checkTime) {
-                                overlapping++;
-                            }
-                        });
+for (let checkTime = new Date(slotStart.getTime()); checkTime < slotEnd; checkTime.setMinutes(checkTime.getMinutes() + 1)) {
+    let overlapping = 1; // 仮予約1件分を初めからカウント
 
-                        if (overlapping >= 2) {
-                            overLimit = true;
-                            break;
-                        }
-                    }
+    relevantEvents.forEach(slot => {
+        const eventStart = new Date(slot.startTime);
+        const eventEnd = new Date(slot.endTime);
+        if (eventStart <= checkTime && eventEnd > checkTime) {
+            overlapping++;
+        }
+    });
 
-                    // ⭐ 利用可否の最終判断（◯ or ✕）を決定するロジック
-                    if (isBusinessEventTime) {
-                        // 営業イベント中で上限オーバー → ✕／それ以外 → ◯
-                        if (overLimit) {
-                            cell.textContent = '✕';
-                            cell.classList.add('unavailable');
-                        } else {
-                            cell.textContent = '◯';
-                            cell.classList.add('available');
-                        }
-                    } else if (businessEventTimes.length > 0) {
-                        // 当日に営業イベントがあるが、時間外 → ✕
-                        cell.textContent = '✕';
-                        cell.classList.add('unavailable');
-                        // ④ ⛔ 日曜日かつ 9:00〜13:59 → ✕（← ご要望の位置に移動）
-                    } else if (slotStart.getDay() === 0 && slotStart.getHours() >= 9 && slotStart.getHours() < 14) {
-                        cell.textContent = '✕';
-                        cell.classList.add('unavailable');
-                    } else if (slotStart.getDay() === 2 && !isBusinessDay && businessEventTimes.length === 0) {
-                        // 日曜日で、営業日ではない場合 → ✕
-                        cell.textContent = '✕';
-                        cell.classList.add('unavailable');
-                    } else if (isBusinessDay && !overLimit) {
-                        // 通常の営業日で上限未満 → ◯
-                        cell.textContent = '◯';
-                        cell.classList.add('available');
-                    } else if (!overLimit) {
-                        // 営業日でなくても上限未満なら → ◯
-                        cell.textContent = '◯';
-                        cell.classList.add('available');
-                    } else {
-                        // その他（上限オーバー） → ✕
-                        cell.textContent = '✕';
-                        cell.classList.add('unavailable');
-                    }
+    if (overlapping > maxOverlap) {
+        maxOverlap = overlapping;
+    }
+
+    if (overlapping >= 3) {
+        overLimit = true;
+        break;
+    }
+}
+
+if (isBusinessEventTime) {
+    if (overLimit) {
+        cell.textContent = '✕';
+        cell.classList.add('unavailable');
+    } else if (maxOverlap === 2) {
+        cell.textContent = '△';
+        cell.classList.add('triangle');
+    } else {
+        cell.textContent = '◯';
+        cell.classList.add('available');
+    }
+} else if (businessEventTimes.length > 0) {
+    cell.textContent = '✕';
+    cell.classList.add('unavailable');
+} else if (slotStart.getDay() === 0 && slotStart.getHours() >= 9 && slotStart.getHours() < 14) {
+    cell.textContent = '✕';
+    cell.classList.add('unavailable');
+} else if (slotStart.getDay() === 2 && !isBusinessDay && businessEventTimes.length === 0) {
+    cell.textContent = '✕';
+    cell.classList.add('unavailable');
+} else if (isBusinessDay && !overLimit) {
+    if (maxOverlap === 2) {
+        cell.textContent = '△';
+        cell.classList.add('triangle');
+    } else {
+        cell.textContent = '◯';
+        cell.classList.add('available');
+    }
+} else if (!overLimit) {
+    if (maxOverlap === 2) {
+        cell.textContent = '△';
+        cell.classList.add('triangle');
+    } else {
+        cell.textContent = '◯';
+        cell.classList.add('available');
+    }
+} else {
+    cell.textContent = '✕';
+    cell.classList.add('unavailable');
+}
+
 
                     // セルにこの時間帯のデータ属性を追加（ISO形式の日時）
                     cell.setAttribute('data-date', slotStart.toISOString());
