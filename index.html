@@ -816,6 +816,7 @@
             <div class="symptoms">
                 <button type="button" onclick="selectSymptom(this, 'treatment1')" data-price="5800">タイ古式 60分</button>
                 <button type="button" onclick="selectSymptom(this, 'treatment2')" data-price="7800">タイ古式 90分</button>
+                <button type="button" onclick="selectSymptom(this, 'treatment17')" data-price="7800">タイ古式 120分</button>
                 <button type="button" onclick="selectSymptom(this, 'treatment3')" data-price="12800">タイ古式+EMM基本コース 90分</button>
             </div>
             <div class="highlight-background">
@@ -1087,6 +1088,7 @@
         let menuTimes = {
             'タイ古式 60分': 110,
             'タイ古式 90分': 140,
+            'タイ古式 120分': 160,
             'タイ古式+EMM基本コース 90分': 140,
             'ベーシックフェイシャル 60分': 150,
             'フットケア 60分': 110,
@@ -1311,6 +1313,8 @@
                 treatmentText.innerHTML = `<div style="text-align:center;"><strong>【酸素吸入30分】<br>料金：2,000円＋カニューラ1,100円</strong></div>`;
             } else if (treatmentId === 'treatment16') {
                 treatmentText.innerHTML = `<div style="text-align:center;"><strong>【酸素吸入60分】<br>料金：3,500円＋カニューラ1,100円</strong></div>`;
+            } else if (treatmentId === 'treatment17') {
+                treatmentText.innerHTML = `<div style="text-align:center;"><strong>【タイ古式 120分】</strong></div>`;
             } else {
                 treatmentText.innerHTML = '';
             }
