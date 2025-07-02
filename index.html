@@ -1715,11 +1715,15 @@ for (let checkTime = new Date(slotStart.getTime()); checkTime < slotEnd; checkTi
     }
 }
 
+// セルの表示をクリアしてリセット（前回の状態が残らないように）
+cell.classList.remove('unavailable', 'available', 'triangle');
+cell.textContent = '';  // これも念のため初期化しておくと良い
+
 if (isBusinessEventTime) {
     if (overLimit) {
         cell.textContent = '✕';
         cell.classList.add('unavailable');
-    } else if (maxOverlap === 2) {
+    } else if (maxOverlap >= 2) {  // 👈 イベントが1件以上ある場合（仮予約+1イベント = 2以上）で△
         cell.textContent = '△';
         cell.classList.add('triangle');
     } else {
@@ -1736,7 +1740,7 @@ if (isBusinessEventTime) {
     cell.textContent = '✕';
     cell.classList.add('unavailable');
 } else if (isBusinessDay && !overLimit) {
-    if (maxOverlap === 2) {
+    if (maxOverlap >= 2) {
         cell.textContent = '△';
         cell.classList.add('triangle');
     } else {
@@ -1744,7 +1748,7 @@ if (isBusinessEventTime) {
         cell.classList.add('available');
     }
 } else if (!overLimit) {
-    if (maxOverlap === 2) {
+    if (maxOverlap >= 2) {
         cell.textContent = '△';
         cell.classList.add('triangle');
     } else {
@@ -1755,6 +1759,7 @@ if (isBusinessEventTime) {
     cell.textContent = '✕';
     cell.classList.add('unavailable');
 }
+
 
 
                     // セルにこの時間帯のデータ属性を追加（ISO形式の日時）
